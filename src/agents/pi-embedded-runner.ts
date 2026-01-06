@@ -385,6 +385,7 @@ export async function compactEmbeddedPiSession(params: {
         const apiKeyInfo = await getApiKeyForModel({
           model,
           cfg: params.config,
+          agentDir,
         });
         authStorage.setRuntimeApiKey(model.provider, apiKeyInfo.apiKey);
       } catch (err) {
@@ -642,6 +643,7 @@ export async function runEmbeddedPiAgent(params: {
           cfg: params.config,
           profileId: candidate,
           store: authStore,
+          agentDir,
         });
       };
 
