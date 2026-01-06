@@ -268,6 +268,21 @@ export function ensureAuthProfileStore(agentDir?: string): AuthProfileStore {
   const asStore = coerceAuthStore(raw);
   if (asStore) return asStore;
 
+  // If agentDir is specified and different from default, also check the default
+  // legacy agent dir as a fallback (for profiles created via `configure`).
+  const defaultAgentDir = resolveClawdbotAgentDir();
+  const resolvedAgentDir = resolveUserPath(agentDir ?? defaultAgentDir);
+  if (agentDir && resolvedAgentDir !== defaultAgentDir) {
+    const defaultAuthPath = resolveAuthStorePath();
+    const defaultRaw = loadJsonFile(defaultAuthPath);
+    const defaultStore = coerceAuthStore(defaultRaw);
+    if (defaultStore && Object.keys(defaultStore.profiles).length > 0) {
+      // Copy profiles from default location to agentDir-specific location
+      saveJsonFile(authPath, defaultStore);
+      return defaultStore;
+    }
+  }
+
   const legacyRaw = loadJsonFile(resolveLegacyAuthStorePath(agentDir));
   const legacy = coerceLegacyStore(legacyRaw);
   const store: AuthProfileStore = {
